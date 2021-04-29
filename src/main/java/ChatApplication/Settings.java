@@ -3,6 +3,7 @@ package ChatApplication;
 import java.awt.Color;
 import javax.swing.*;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Toolkit;
 import java.awt.Window;
 
@@ -28,7 +29,7 @@ public class Settings extends JFrame {
 
         settingsFrame.setSize(1000, 800);
         settingsFrame.setResizable(false);
-        settingsFrame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+        this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 
         settingsFrame.add(settingsPanel);
         settingsPanel.setLayout(null);
@@ -66,7 +67,7 @@ public class Settings extends JFrame {
         emailLabel.setForeground(textColor);
         emailLabel.setFont(new java.awt.Font("Segoe UI", 1, 20));
 
-        JLabel emailUserLabel = new JLabel("nikopeny@gmail.com");
+        JLabel emailUserLabel = new JLabel(authentication.getLoggedEmail());
         emailUserLabel.setBounds(440, 360, 400, 25);
         emailUserLabel.setForeground(textColor);
         emailUserLabel.setFont(new java.awt.Font("Segoe UI", 1, 20));
@@ -75,31 +76,31 @@ public class Settings extends JFrame {
         changePasswordButton.setBorder(new RoundedButton(10));
         changePasswordButton.setBackground(new java.awt.Color(79, 119, 240));
         changePasswordButton.setForeground(textColor);
-        changePasswordButton.setFont(new java.awt.Font("Segoe UI", 1, 10));
+        changePasswordButton.setFont(new java.awt.Font("Segoe UI", 1, 14));
         changePasswordButton.setText("Vaihda salasana");
-        changePasswordButton.setBounds(700, 280, 150, 25);
+        changePasswordButton.setBounds(700, 280, 150, 40);
         changePasswordButton.setFocusable(false);
 
         JButton changeEmailButton = new JButton();
         changeEmailButton.setBorder(new RoundedButton(10));
         changeEmailButton.setBackground(new java.awt.Color(79, 119, 240));
         changeEmailButton.setForeground(textColor);
-        changeEmailButton.setFont(new java.awt.Font("Segoe UI", 1, 10));
+        changeEmailButton.setFont(new java.awt.Font("Segoe UI", 1, 14));
         changeEmailButton.setText("Vaihda sähköposti");
-        changeEmailButton.setBounds(700, 360, 150, 25);
+        changeEmailButton.setBounds(700, 360, 150, 40);
         changeEmailButton.setFocusable(false);
 
-        JLabel nicknameInChatLabel = new JLabel("*Nimimerkki näkyy muille käyttäjille keskustelussa");
+        JLabel nicknameInChatLabel = new JLabel("Nimimerkki näkyy muille käyttäjille keskustelussa");
         nicknameInChatLabel.setBounds(250, 500, 400, 25);
         nicknameInChatLabel.setForeground(textColor);
-        nicknameInChatLabel.setFont(new java.awt.Font("Comic Sans MS", 1, 14));
+        nicknameInChatLabel.setFont(new java.awt.Font("Segoe UI", Font.ITALIC, 14));
 
         JLabel nicknameLabel = new JLabel("Nimimerkki");
         nicknameLabel.setBounds(250, 460, 400, 25);
         nicknameLabel.setForeground(textColor);
         nicknameLabel.setFont(new java.awt.Font("Segoe UI", 1, 20));
 
-        JLabel userNicknameLabel = new JLabel("Lempinimi");
+        JLabel userNicknameLabel = new JLabel(authentication.getLoggedNick());
         userNicknameLabel.setBounds(440, 460, 100, 25);
         userNicknameLabel.setForeground(textColor);
         userNicknameLabel.setFont(new java.awt.Font("Segoe UI", 1, 20));
@@ -108,9 +109,9 @@ public class Settings extends JFrame {
         changeNicknameButton.setBorder(new RoundedButton(10));
         changeNicknameButton.setBackground(new java.awt.Color(79, 119, 240));
         changeNicknameButton.setForeground(textColor);
-        changeNicknameButton.setFont(new java.awt.Font("Segoe UI", 1, 10));
+        changeNicknameButton.setFont(new java.awt.Font("Segoe UI", 1, 14));
         changeNicknameButton.setText("Vaihda nimimerkki");
-        changeNicknameButton.setBounds(700, 460, 150, 25);
+        changeNicknameButton.setBounds(700, 460, 150, 40);
         changeNicknameButton.setFocusable(false);
 
         JButton logoutButton = new JButton();
@@ -119,8 +120,20 @@ public class Settings extends JFrame {
         logoutButton.setForeground(textColor);
         logoutButton.setFont(new java.awt.Font("Segoe UI", 1, 14));
         logoutButton.setText("Kirjaudu ulos");
-        logoutButton.setBounds(700, 675, 200, 30);
+        logoutButton.setBounds(687, 675, 180, 55);
         logoutButton.setFocusable(false);
+
+        JSeparator separator1 = new JSeparator();
+        separator1.setBounds(250, 250, 600, 1);
+        separator1.setForeground(Color.black);
+
+        JSeparator separator2 = new JSeparator();
+        separator2.setBounds(250, 340, 600, 1);
+        separator2.setForeground(Color.black);
+
+        JSeparator separator3 = new JSeparator();
+        separator3.setBounds(250, 420, 600, 1);
+        separator3.setForeground(Color.black);
 
         // Add components to JPanel
         settingsPanel.add(titleLabel);
@@ -138,26 +151,61 @@ public class Settings extends JFrame {
         settingsPanel.add(userNicknameLabel);
         settingsPanel.add(changeNicknameButton);
         settingsPanel.add(logoutButton);
+        settingsPanel.add(separator1);
+        settingsPanel.add(separator2);
+        settingsPanel.add(separator3);
 
         // Adding functionality to buttons
         changePasswordButton.addActionListener((java.awt.event.ActionEvent evt) -> {
-
-            System.out.println("Pop up ikkuna vaihtamaan salis ");
-
-        });
-
-        changeEmailButton.addActionListener(new java.awt.event.ActionListener() {
-            @Override
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                String name = JOptionPane.showInputDialog(settingsFrame,
-                        "Syötä uusi tieto", null);
+            Object selected = JOptionPane.showInputDialog(null, "Syötä uusi salasana", "Vaida salasanaa",
+                    JOptionPane.PLAIN_MESSAGE, null, null, null);
+            
+            if (selected != null) {
+                if (!selected.toString().isEmpty()) { // Check that channel string is not empty
+                    // Add new channel to channels if it doesn't yet exist
+                    String pWordString = selected.toString();
+                    authentication.setPassword(pWordString);
+                    System.out.println(pWordString);
+                    
+                }
             }
         });
 
+        changeEmailButton.addActionListener((java.awt.event.ActionEvent evt) -> {
+            Object selected = JOptionPane.showInputDialog(null, "Syötä uusi sähköposti", "Vaida sähköposti",
+                    JOptionPane.PLAIN_MESSAGE, null, null, null);
+
+            if (selected != null) {
+                if (!selected.toString().isEmpty()) { // Check that channel string is not empty
+                    // Add new channel to channels if it doesn't yet exist
+                    String emailString = selected.toString();
+                    authentication.setLoggedEmail(emailString);
+                    emailUserLabel.setText(emailString);
+                    System.out.println(emailString);
+
+                }
+            }
+        });
+
+        changeEmailButton.addActionListener((java.awt.event.ActionEvent evt) -> {
+            String name1 = JOptionPane.showInputDialog(settingsFrame,
+                    "Syötä uusi tieto", null);
+        });
+
         changeNicknameButton.addActionListener((java.awt.event.ActionEvent evt) -> {
-
-            System.out.println("Pop up ikkuna vaihtamaan nikki ");
-
+            Object selected = JOptionPane.showInputDialog(null, "Syötä uusi lempinimi", "Vaida lempinimeä",
+                    JOptionPane.PLAIN_MESSAGE, null, null, null);
+            
+            if (selected != null) {
+                if (!selected.toString().isEmpty()) { // Check that channel string is not empty
+                    // Add new channel to channels if it doesn't yet exist
+                    String nickNameString = selected.toString();
+                    authentication.setLoggedNick(nickNameString);
+                    userNicknameLabel.setText(nickNameString);
+                    System.out.println(nickNameString);
+                    
+                }
+            }
         });
 
         logoutButton.addActionListener((java.awt.event.ActionEvent evt) -> {
@@ -168,6 +216,20 @@ public class Settings extends JFrame {
             login.setVisible(true);
             // Set logged user to empty string when user logs out
             authentication.setLoggedUser("");
+        });
+
+        logoutButton.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent evt
+            ) {
+                logoutButton.setBackground(new java.awt.Color(168, 73, 75));
+            }
+
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent evt
+            ) {
+                logoutButton.setBackground(new java.awt.Color(158, 63, 65));
+            }
         });
     }
 
@@ -185,5 +247,13 @@ public class Settings extends JFrame {
     @Override
     public void setVisible(boolean visible) {
         settingsFrame.setVisible(visible);
+    }
+
+    // Main for testing
+    public static void main(String[] args) {
+        java.awt.EventQueue.invokeLater(() -> {
+            Settings settings = new Settings();
+            settings.setVisible(true);
+        });
     }
 }

@@ -12,15 +12,14 @@ import java.util.logging.Logger;
 
 public class ChatChannel {
 
-    private ArrayList<ChatMessage> messages;
     HashMap<String, ChatChannel> channels;
     String currentChannel;
     private final ServerConnection connection = new ServerConnection("C:\\Users\\Eetu\\Documents\\NetBeansProjects\\Chat_application_with_back_end\\localhost.cer");
 
     public ChatChannel() {
         this.channels = new HashMap<>();
-        this.messages = new ArrayList<>();
-        this.currentChannel = "Kanava";
+        this.currentChannel = "Yleinen";
+        addChannel("Yleinen");
     }
 
     public void addChannel(String channel) {
@@ -35,8 +34,6 @@ public class ChatChannel {
 
     public ArrayList listChannels() {
         Authentication authentication = Authentication.getInstance();
-        ArrayList<String> channelList = new ArrayList<>();
-
         try {
             return connection.listChannels(authentication.getLoggedUser(), authentication.getPassword());
         } catch (IOException | KeyStoreException | NoSuchAlgorithmException | KeyManagementException | java.security.cert.CertificateException ex) {
@@ -54,22 +51,16 @@ public class ChatChannel {
     }
 
     public ArrayList<ChatMessage> getMessagesFromChannel(String channel) {
-        // Todo add channel
         Authentication authentication = Authentication.getInstance();
 
         try {
             ArrayList<String> channels = connection.listChannels(authentication.getLoggedUser(), authentication.getPassword());
             if (channels.toString().contains(channel)) {
-                if (connection.getMessagesFromChannel(channel) != null){
-                    System.out.println("jee!");
-                    System.out.println("Messages from channel " + channel + ":" + connection.getMessagesFromChannel(channel));
-                    if (connection.getMessagesFromChannel(channel).isEmpty()) {
-                        System.out.println("Its empty!!!");
-                    }
+                if (connection.getMessagesFromChannel(channel) != null) {
                     return connection.getMessagesFromChannel(channel);
                 }
             } else {
-                System.out.println("getMessagesFromChannel issue");
+                System.out.println("Could not get messages from channel:" + channel);
             }
         } catch (IOException | KeyStoreException | NoSuchAlgorithmException | KeyManagementException | CertificateException ex) {
             Logger.getLogger(ChatChannel.class.getName()).log(Level.SEVERE, null, ex);
@@ -83,11 +74,7 @@ public class ChatChannel {
         try {
             ArrayList<String> channels = connection.listChannels(authentication.getLoggedUser(), authentication.getPassword());
             if (channels.toString().contains(msg.channel)) {
-                System.out.println("chnl " + msg.channel);
-                System.out.println("chnl2" + msg.channel);
                 connection.postMessageToChannel(authentication.getLoggedUser(), authentication.getPassword(), msg);
-            } else {
-                System.out.println("eitoimi");
             }
         } catch (IOException | KeyStoreException | NoSuchAlgorithmException | KeyManagementException | CertificateException ex) {
             Logger.getLogger(ChatChannel.class.getName()).log(Level.SEVERE, null, ex);

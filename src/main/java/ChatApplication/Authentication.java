@@ -35,7 +35,7 @@ public class Authentication {
             if (connection.authenticate(username, password) == 200) {
                 setPassword(password);
                 return 200;
-            } else if (connection.authenticate(username,password) == 401) {
+            } else if (connection.authenticate(username, password) == 401) {
                 return 401;
             }
             // Check if user exists and if password matches
@@ -73,5 +73,31 @@ public class Authentication {
 
     public String getPassword() {
         return this.loggedPassword;
+    }
+
+    public void setLoggedEmail(String newEmail) {
+        String username = getLoggedUser();
+        String password = this.users.get(username).password;
+        String nickname = this.users.get(username).nickname;
+
+        User user = new User(username, password, newEmail, nickname);
+        this.users.put(getLoggedUser(), user);
+    }
+
+    public String getLoggedEmail() {
+        return "Email";
+    }
+
+    public void setLoggedNick(String nick) {
+        String username = getLoggedUser();
+        String password = this.users.get(username).password;
+        String email = this.users.get(username).email;
+
+        User user = new User(username, password, email, nick);
+        this.users.put(getLoggedUser(), user);
+    }
+
+    public String getLoggedNick() {
+        return "Nickname";
     }
 }
