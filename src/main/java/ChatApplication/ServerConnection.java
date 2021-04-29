@@ -361,7 +361,10 @@ public class ServerConnection {
 
             stream.close();
             System.out.println("JOU3");
-            lastModified = connection.getHeaderField("Last-Modified");
+
+            if (connection.getHeaderField("Last-Modified") != null) {
+                lastModified = connection.getHeaderField("Last-Modified");
+            }
 
             if (text.isEmpty()) {
                 return null;

@@ -515,7 +515,6 @@ public class Chat extends JFrame {
        if (msgs != null) {
            for (ChatMessage msg : msgs) {
                model.addElement(msg);
-               this.messages.add(msg);
            }
        }
     }
