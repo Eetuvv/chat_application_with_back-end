@@ -7,14 +7,10 @@ public class ChatMessage {
     String message;
     String channel;
     
-    public ChatMessage(String channel, String user, String message) {
+    public ChatMessage(String channel, String user, String message, String timestamp) {
         Authentication authentication = Authentication.getInstance();
         
-        if (authentication.getLoggedUser().isEmpty()) {
-            this.user = "Anonymous";
-        } else {
-            this.user = authentication.getLoggedUser();
-        }
+        this.user = user;
         this.timestamp = timestamp;
         this.message = message;
         this.channel = channel;

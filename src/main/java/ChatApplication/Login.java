@@ -111,16 +111,19 @@ public class Login extends JFrame {
                 JOptionPane.showMessageDialog(null, "Käyttäjätunnus tai salasana ei saa olla tyhjä", "Kirjautumisvirhe", JOptionPane.ERROR_MESSAGE);
             } else {
                 // Check if username and password are correct
-                if (authentication.authenticateUser(user, password)) {
+                int response = authentication.authenticateUser(user, password);
+
+                if (response == 200) {
                     authentication.setLoggedUser(user);
-                    
                     // Close login window and open chat window
                     this.setVisible(false);
                     this.dispose();
                     Chat chatWindow = new Chat();
                     chatWindow.setVisible(true);
-                } else {
+                } else if (response == 401) { // 401 if username or password incorrect
                     JOptionPane.showMessageDialog(null, "Väärä käyttäjätunnus tai salasana", "Kirjautumisvirhe", JOptionPane.ERROR_MESSAGE);
+                } else { // Show a connection error if response code is something else
+                    JOptionPane.showMessageDialog(null, "Palvelimeen ei saatu yhteyttä", "Yhteysvirhe", JOptionPane.ERROR_MESSAGE);
                 }
             }
         });

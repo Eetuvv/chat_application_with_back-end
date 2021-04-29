@@ -29,29 +29,30 @@ public class Authentication {
         return singleton;
     }
 
-    public boolean authenticateUser(String username, String password) {
+    public int authenticateUser(String username, String password) {
         ServerConnection connection = new ServerConnection("C:\\Users\\Eetu\\Documents\\NetBeansProjects\\Chat_application_with_back_end\\localhost.cer");
         try {
-            if (connection.authenticate(username, password)) {
-                System.out.println("onkotrue");
+            if (connection.authenticate(username, password) == 200) {
                 setPassword(password);
-                return true;
+                return 200;
+            } else if (connection.authenticate(username,password) == 401) {
+                return 401;
             }
             // Check if user exists and if password matches
-        } catch (IOException | CertificateException | KeyStoreException | NoSuchAlgorithmException | KeyManagementException | javax.security.cert.CertificateException ex) {
+        } catch (IOException | CertificateException | KeyStoreException | NoSuchAlgorithmException | KeyManagementException ex) {
             Logger.getLogger(Authentication.class.getName()).log(Level.SEVERE, null, ex);
         }
-        return false;
+        return 400;
     }
 
     public boolean addUser(String username, String password, String email, String nickname) {
         ServerConnection connection = new ServerConnection("C:\\Users\\Eetu\\Documents\\NetBeansProjects\\Chat_application_with_back_end\\localhost.cer");
         try {
-            if (connection.registerUser(nickname, username, password, email, email) == 200) {
+            if (connection.registerUser(nickname, username, password, email, "user") == 200) {
                 return true;
             }
-        } catch (IOException | KeyManagementException | KeyStoreException | NoSuchAlgorithmException | CertificateException | javax.security.cert.CertificateException e) {
-            e.printStackTrace();
+        } catch (IOException | KeyManagementException | KeyStoreException | NoSuchAlgorithmException | CertificateException e) {
+            System.out.println("Error adding user");
         }
         return false;
     }

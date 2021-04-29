@@ -13,8 +13,7 @@ import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import javax.swing.DefaultListModel;
@@ -36,6 +35,10 @@ public class Chat extends JFrame {
     public final JFrame chatFrame = new JFrame("Chat");
     ChatChannel chatChannel = new ChatChannel();
     String currentChannel;
+    private final DefaultListModel<ChatMessage> model = new DefaultListModel<>();
+    JList<ChatMessage> chatArea = new JList<>(model);
+    ArrayList<ChatMessage> messages;
+
 
     public Chat() {
         currentChannel = chatChannel.getCurrentChannel();
@@ -96,15 +99,9 @@ public class Chat extends JFrame {
         channelLabel.setBounds(70, 30, 275, 50);
         channelLabel.setForeground(textColor);
 
-        // Create JList to show chat messages
-        DefaultListModel<ChatMessage> model = new DefaultListModel<>();
-
         // Get messages from current channel and append them to chat area
-        chatChannel.getMessagesFromChannel(currentChannel).forEach(msg -> {
-            model.addElement(msg);
-        });
-
-        JList<ChatMessage> chatArea = new JList<>(model);
+        refreshMessages();
+        
         chatArea.setBackground(new java.awt.Color(106, 111, 117));
         chatArea.setCellRenderer(new CellRenderer());
         chatArea.setFixedCellHeight(85);
@@ -254,11 +251,7 @@ public class Chat extends JFrame {
                 // Clear chat area
                 model.removeAllElements();
                 // Get messages from current channel and append them to chat area
-                System.out.println("current channel is " + currentChannel);
-                chatChannel.getMessagesFromChannel(currentChannel).forEach(msg -> {
-                    System.out.println("msgg " + msg);
-                    model.addElement(msg);
-                });
+                refreshMessages();
             }
         });
 
@@ -276,12 +269,12 @@ public class Chat extends JFrame {
                     String channelString = selected.toString();
 
                     // Capitalize first letter
-                    String capitalizedChannel = channelString.substring(0, 1).toUpperCase() + channelString.toString().substring(1);;
+                    String capitalizedChannel = channelString.substring(0, 1).toUpperCase() + channelString.substring(1);;
                     ArrayList<String> channels = chatChannel.listChannels();
 
                     // If channel doesn't exist yet, add a new channel
                     if (!channels.stream().anyMatch(capitalizedChannel::equalsIgnoreCase)) {
-                        //chatChannel.addChannel(capitalizedChannel);
+                        chatChannel.addChannel(capitalizedChannel);
                         // Set new channel to current channel
                         currentChannel = capitalizedChannel;
 
@@ -298,9 +291,8 @@ public class Chat extends JFrame {
                         // Clear chat area
                         model.removeAllElements();
                         // Get messages from current channel and append them to chat area
-                        chatChannel.getMessagesFromChannel(currentChannel).forEach(msg -> {
-                            model.addElement(msg);
-                        });
+
+                        refreshMessages();
                     } else {
                         // Get channel name from channels list to make sure that capitalization is the same
                         for (int i = 0; i < channels.size(); i++) {
@@ -319,9 +311,7 @@ public class Chat extends JFrame {
                             // Clear chat area
                             model.removeAllElements();
                             // Get messages from current channel and append them to chat area
-                            chatChannel.getMessagesFromChannel(currentChannel).forEach(msg -> {
-                                model.addElement(msg);
-                            });
+                            refreshMessages();
                         }
                     }
                 }
@@ -341,13 +331,14 @@ public class Chat extends JFrame {
 
         sendMessageButton.addActionListener((java.awt.event.ActionEvent evt) -> {
             String message = messageField.getText();
-            LocalDateTime time = LocalDateTime.now();
+            ZonedDateTime time = ZonedDateTime.now();
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM.dd.yyyy HH:mm:ss");
+            String timestamp = time.format(formatter);
 
-            ChatMessage msg = new ChatMessage(currentChannel, authentication.getLoggedUser(), message);
-            System.out.println(msg.channel + msg.message + msg.user);
+            ChatMessage msg = new ChatMessage(currentChannel, authentication.getLoggedUser(), message, timestamp);
 
             Color colorComparison = new java.awt.Color(190, 190, 190);
+            
             // Don't send a new message if message is empty or if message color equals placeholder color
             if (!message.isEmpty() && !messageField.getForeground().equals(colorComparison)) {
                 model.addElement(msg);
@@ -375,11 +366,11 @@ public class Chat extends JFrame {
                     // Check if message field has focus and message is not empty
                     if (messageField.hasFocus() && !messageField.getText().isEmpty()) {
                         String message = messageField.getText();
-                        LocalDateTime time = LocalDateTime.now();
+                        ZonedDateTime time = ZonedDateTime.now();
                         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM.dd.yyyy HH:mm:ss");
                         String timestamp = time.format(formatter);
 
-                        ChatMessage msg = new ChatMessage(currentChannel, authentication.getLoggedUser(), message);
+                        ChatMessage msg = new ChatMessage(currentChannel, authentication.getLoggedUser(), message, timestamp);
                         model.addElement(msg);
                         chatChannel.addMessageToChannel(msg);
                         messageField.setText("");
@@ -387,6 +378,7 @@ public class Chat extends JFrame {
                 }
             }
 
+            @Override
             public void keyReleased(KeyEvent e) {
             }
         });
@@ -410,20 +402,17 @@ public class Chat extends JFrame {
 
         // Change message field text when channel label text is changed (when channel is changed)
         channelLabel.addPropertyChangeListener("text", (PropertyChangeEvent evt) -> {
-            System.out.println("ok");
             messageField.setText("Lähetä viesti kanavalle " + channelLabel.getText().replaceAll("\\s+", ""));
 
+            // Trim string
             String channelStr = channelLabel.getText().replaceAll("\\s+", "");
             channelStr = channelStr.replace("#", "");
             currentChannel = channelStr.trim();
-
+            
             messageField.setForeground(new Color(190, 190, 190));
             model.removeAllElements();
             // Get messages from current channel and append them to chat area
-            System.out.println("current ch !!!!!!!!!!!!!!!!!!! is: ");
-            chatChannel.getMessagesFromChannel(currentChannel).forEach(msg -> {
-                model.addElement(msg);
-            });
+            refreshMessages();
         });
 
         // Set hover actions to buttons
@@ -498,6 +487,16 @@ public class Chat extends JFrame {
                 logoutButton.setBackground(new java.awt.Color(158, 63, 65));
             }
         });
+    }
+
+    // Get messages from current channel and display them in chat area
+    private void refreshMessages() {
+        this.messages = chatChannel.getMessagesFromChannel(currentChannel);
+        if (messages != null && !messages.isEmpty()) {
+            chatChannel.getMessagesFromChannel(currentChannel).forEach(msg -> {
+                model.addElement(msg);
+            });
+        }
     }
 
     @Override
