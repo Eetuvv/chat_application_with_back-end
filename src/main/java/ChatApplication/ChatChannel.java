@@ -76,9 +76,7 @@ public class ChatChannel {
         Authentication authentication = Authentication.getInstance();
 
         try {
-            // TODO check that no skipping msgs
-            ArrayList<ChatMessage> msgs = connection.getMessagesSince(channel);
-            return msgs;
+            return connection.getMessagesSince(channel);
         } catch (IOException | CertificateException | KeyStoreException | NoSuchAlgorithmException | KeyManagementException ex) {
             Logger.getLogger(ChatChannel.class.getName()).log(Level.SEVERE, null, ex);
         }

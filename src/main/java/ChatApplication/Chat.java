@@ -106,6 +106,7 @@ public class Chat extends JFrame {
         chatArea.setBackground(new java.awt.Color(106, 111, 117));
         chatArea.setCellRenderer(new CellRenderer());
         chatArea.setFixedCellHeight(85);
+        chatArea.ensureIndexIsVisible(chatArea.getModel().getSize() - 1);
 
         JScrollPane scrollPane = new JScrollPane(chatArea);
         scrollPane.setBounds(300, 2, 1035, 866);
@@ -257,66 +258,71 @@ public class Chat extends JFrame {
         });
 
         createChannelButton.addActionListener((ActionEvent evt) -> {
-            UIManager.put("OptionPane.cancelButtonText", "Peruuta");
-            UIManager.put("OptionPane.okButtonText", "Valmis");
             UIManager.put("OptionPane.yesButtonText", "Siirry");
             UIManager.put("OptionPane.noButtonText", "Peruuta");
 
-            Object selected = JOptionPane.showInputDialog(null, "Syötä kanavan nimi", "Luo uusi kanava", JOptionPane.PLAIN_MESSAGE, null, null, null);
+            final JLabel selected = new JLabel("");
+            CustomDialog dialog = new CustomDialog("Kanavan luominen", "Syötä kanavan nimi");
+            dialog.setOnOk(event -> {
+                if (dialog.getText() != null) {
+                    selected.setText(dialog.getText());
+                }
+            });
+            dialog.show();
 
-            if (selected != null) { // Null if user cancels
-                if (!selected.toString().isEmpty()) { // Check that channel string is not empty
-                    // Add new channel to channels if it doesn't yet exist
-                    String channelString = selected.toString();
+            String channelString = selected.getText();
+            
+            if (!channelString.isEmpty()) { // Check that channel string is not empty
+                // Add new channel to channels if it doesn't yet exist
 
-                    // Capitalize first letter
-                    String capitalizedChannel = channelString.substring(0, 1).toUpperCase() + channelString.substring(1);;
-                    ArrayList<String> channels = chatChannel.listChannels();
+                // Capitalize first letter
+                String capitalizedChannel = channelString.substring(0, 1).toUpperCase() + channelString.substring(1);
+                ArrayList<String> channels = chatChannel.listChannels();
 
-                    // If channel doesn't exist yet, add a new channel
-                    if (!channels.stream().anyMatch(capitalizedChannel::equalsIgnoreCase)) {
-                        chatChannel.addChannel(capitalizedChannel);
-                        // Set new channel to current channel
-                        currentChannel = capitalizedChannel;
+                // If channel doesn't exist yet, add a new channel
+                if (!channels.stream().anyMatch(capitalizedChannel::equalsIgnoreCase)) {
+                    chatChannel.addChannel(capitalizedChannel);
+                    // Set new channel to current channel
+                    currentChannel = capitalizedChannel;
 
-                        if (capitalizedChannel.length() >= 9 && capitalizedChannel.length() < 20) {
-                            channelLabel.setFont(new java.awt.Font("Dialog", 1, 28));
-                        } else if (capitalizedChannel.length() >= 20) {
-                            channelLabel.setFont(new java.awt.Font("Dialog", 1, 26));
-                        } else {
-                            channelLabel.setFont(new java.awt.Font("Dialog", 1, 32));
+                    if (capitalizedChannel.length() >= 9 && capitalizedChannel.length() < 20) {
+                        channelLabel.setFont(new java.awt.Font("Dialog", 1, 28));
+                    } else if (capitalizedChannel.length() >= 20) {
+                        channelLabel.setFont(new java.awt.Font("Dialog", 1, 26));
+                    } else {
+                        channelLabel.setFont(new java.awt.Font("Dialog", 1, 32));
+                    }
+                    channelLabel.setText("# " + capitalizedChannel);
+                    this.chatFrame.repaint();
+
+                    // Clear chat area
+                    model.removeAllElements();
+                    // Get messages from current channel and append them to chat area
+
+                    showMessages();
+                } else {
+                    // Get channel name from channels list to make sure that capitalization is the same
+                    for (int i = 0; i < channels.size(); i++) {
+                        if (channels.get(i).equalsIgnoreCase(capitalizedChannel)) {
+                            capitalizedChannel = channels.get(i);
                         }
+                    }
+                    int selection = JOptionPane.showConfirmDialog(null, "Kanava on jo olemassa, siirry kanavalle '" + capitalizedChannel + "'?", "Valitse toiminto...", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+                    // If user chooses to switch channel, set current channel to new channel
+                    if (selection == JOptionPane.YES_OPTION) {
+                        chatChannel.setCurrentChannel(capitalizedChannel);
+                        currentChannel = capitalizedChannel;
                         channelLabel.setText("# " + capitalizedChannel);
+                        // Repaint frame to not mess up gradient
                         this.chatFrame.repaint();
-
                         // Clear chat area
                         model.removeAllElements();
                         // Get messages from current channel and append them to chat area
-
                         showMessages();
-                    } else {
-                        // Get channel name from channels list to make sure that capitalization is the same
-                        for (int i = 0; i < channels.size(); i++) {
-                            if (channels.get(i).equalsIgnoreCase(capitalizedChannel)) {
-                                capitalizedChannel = channels.get(i);
-                            }
-                        }
-                        int selection = JOptionPane.showConfirmDialog(null, "Kanava on jo olemassa, siirry kanavalle '" + capitalizedChannel + "'?", "Valitse toiminto...", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
-                        // If user chooses to switch channel, set current channel to new channel
-                        if (selection == JOptionPane.YES_OPTION) {
-                            chatChannel.setCurrentChannel(capitalizedChannel);
-                            currentChannel = capitalizedChannel;
-                            channelLabel.setText("# " + capitalizedChannel);
-                            // Repaint frame to not mess up gradient
-                            this.chatFrame.repaint();
-                            // Clear chat area
-                            model.removeAllElements();
-                            // Get messages from current channel and append them to chat area
-                            showMessages();
-                        }
                     }
                 }
             }
+
         });
 
         logoutButton.addActionListener((java.awt.event.ActionEvent evt) -> {
@@ -342,7 +348,7 @@ public class Chat extends JFrame {
 
             // Don't send a new message if message is empty or if message color equals placeholder color
             if (!message.isEmpty() && !messageField.getForeground().equals(colorComparison)) {
-                model.addElement(msg);
+                //model.addElement(msg);
                 chatChannel.addMessageToChannel(msg);
                 messageField.setText("");
             }
@@ -372,7 +378,7 @@ public class Chat extends JFrame {
                         String timestamp = time.format(formatter);
 
                         ChatMessage msg = new ChatMessage(currentChannel, authentication.getLoggedUser(), message, timestamp);
-                        model.addElement(msg);
+                        //model.addElement(msg);
                         chatChannel.addMessageToChannel(msg);
                         messageField.setText("");
                     }
@@ -489,8 +495,8 @@ public class Chat extends JFrame {
             }
         });
 
-        // Refresh messages every second
-        int delay = 1000; //milliseconds
+        // Refresh messages with timer
+        int delay = 500; //milliseconds
         ActionListener taskPerformer = new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
                 refreshMessages();
@@ -508,15 +514,17 @@ public class Chat extends JFrame {
             });
         }
     }
-    
+
     private void refreshMessages() {
         ArrayList<ChatMessage> msgs = chatChannel.getNewestMessages(currentChannel);
-        
-       if (msgs != null) {
-           for (ChatMessage msg : msgs) {
-               model.addElement(msg);
-           }
-       }
+
+        if (msgs != null) {
+            for (ChatMessage msg : msgs) {
+                model.addElement(msg);
+            }
+            // Scroll to bottom of chat area when a new message is posted
+            chatArea.ensureIndexIsVisible(chatArea.getModel().getSize() - 1);
+        }
     }
 
     @Override

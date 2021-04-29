@@ -341,8 +341,6 @@ public class ServerConnection {
             connection.setRequestProperty("Authorization", basicAuth);
             connection.setRequestProperty("Content-Type", "application/json");
             connection.setRequestMethod("GET");
-            System.out.println("JOU");
-            System.out.println(lastModified);
             if (lastModified != null) {
                 connection.setRequestProperty("If-Modified-Since", lastModified);
             } else {
@@ -351,7 +349,6 @@ public class ServerConnection {
             connection.setReadTimeout(3 * 1000);
             connection.setUseCaches(false);
 
-            System.out.println("JOU2");
             InputStream stream = connection.getInputStream();
 
             String text = new BufferedReader(new InputStreamReader(stream,
@@ -360,7 +357,6 @@ public class ServerConnection {
                     .collect(Collectors.joining("\n"));
 
             stream.close();
-            System.out.println("JOU3");
 
             if (connection.getHeaderField("Last-Modified") != null) {
                 lastModified = connection.getHeaderField("Last-Modified");
@@ -370,7 +366,6 @@ public class ServerConnection {
                 return null;
             }
 
-            System.out.println("lastmodified: " + lastModified);
             JSONArray jsonArray = new JSONArray(text);
 
             for (int i = 0; i < jsonArray.length(); i++) {
