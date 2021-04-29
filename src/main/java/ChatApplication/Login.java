@@ -13,6 +13,7 @@ import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.UIManager;
+import javax.swing.border.LineBorder;
 
 public class Login extends JFrame {
 
@@ -91,6 +92,10 @@ public class Login extends JFrame {
         registerButton.setText("Uusi käyttäjä? Rekisteröidy");
         registerButton.setBounds(350, 440, 300, 40);
 
+        // Set tooltip text color and background
+        UIManager.put("ToolTip.background", Color.white);
+        UIManager.put("ToolTip.border", new LineBorder(Color.BLACK, 1));
+
         // Add components to JPanel
         loginPanel.add(titleLabel);
         loginPanel.add(usernameLabel);
@@ -104,7 +109,7 @@ public class Login extends JFrame {
         // Set login button functionality
         loginButton.addActionListener((java.awt.event.ActionEvent evt) -> {
             String user = usernameField.getText();
-            String password = passwordField.getText();
+            String password = String.valueOf(passwordField.getPassword());
 
             UIManager.put("OptionPane.okButtonText", "OK");
             if (password.isEmpty() || user.isEmpty()) {

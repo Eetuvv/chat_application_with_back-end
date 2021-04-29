@@ -26,7 +26,9 @@ public class ChatChannel {
         Authentication authentication = Authentication.getInstance();
         ChatMessage msg = new ChatMessage(channel, " ", " ", " ");
         try {
-            connection.postMessageToChannel(authentication.getLoggedUser(), authentication.getPassword(), msg);
+            if (!authentication.getLoggedUser().isEmpty()) {
+                connection.postMessageToChannel(authentication.getLoggedUser(), authentication.getPassword(), msg);
+            }
         } catch (IOException | CertificateException | KeyStoreException | NoSuchAlgorithmException | KeyManagementException ex) {
             Logger.getLogger(ChatChannel.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -52,17 +54,32 @@ public class ChatChannel {
 
     public ArrayList<ChatMessage> getMessagesFromChannel(String channel) {
         Authentication authentication = Authentication.getInstance();
-
+        ArrayList<ChatMessage> msgs = new ArrayList<>();
         try {
             ArrayList<String> channels = connection.listChannels(authentication.getLoggedUser(), authentication.getPassword());
-            if (channels.toString().contains(channel)) {
-                if (connection.getMessagesFromChannel(channel) != null) {
-                    return connection.getMessagesFromChannel(channel);
+            if (channels.toString().contains(channel)) {;
+                msgs = connection.getMessagesFromChannel(channel);
+                if (msgs != null) {
+                    return msgs;
                 }
             } else {
                 System.out.println("Could not get messages from channel:" + channel);
+                System.out.println("msgs: " + msgs.toString());
             }
         } catch (IOException | KeyStoreException | NoSuchAlgorithmException | KeyManagementException | CertificateException ex) {
+            Logger.getLogger(ChatChannel.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return null;
+    }
+
+    public ArrayList<ChatMessage> getNewestMessages(String channel) {
+        Authentication authentication = Authentication.getInstance();
+
+        try {
+            // TODO check that no skipping msgs
+            ArrayList<ChatMessage> msgs = connection.getMessagesSince(channel);
+            return msgs;
+        } catch (IOException | CertificateException | KeyStoreException | NoSuchAlgorithmException | KeyManagementException ex) {
             Logger.getLogger(ChatChannel.class.getName()).log(Level.SEVERE, null, ex);
         }
         return null;

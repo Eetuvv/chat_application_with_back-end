@@ -127,8 +127,8 @@ public class Registration extends JFrame {
         registerButton.addActionListener((java.awt.event.ActionEvent evt) -> {
 
             String user = usernameField.getText();
-            String password = passwordField.getText();
-            String password2 = passwordField2.getText();
+            String password = String.valueOf(passwordField.getPassword());
+            String password2 = String.valueOf(passwordField2.getPassword());
             String email = emailField.getText();
             String nickname = user;
 

@@ -9,6 +9,7 @@ import java.awt.Graphics2D;
 import java.awt.Paint;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.KeyEvent;
@@ -27,6 +28,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+import javax.swing.Timer;
 import javax.swing.UIManager;
 import javax.swing.border.LineBorder;
 
@@ -38,7 +40,6 @@ public class Chat extends JFrame {
     private final DefaultListModel<ChatMessage> model = new DefaultListModel<>();
     JList<ChatMessage> chatArea = new JList<>(model);
     ArrayList<ChatMessage> messages;
-
 
     public Chat() {
         currentChannel = chatChannel.getCurrentChannel();
@@ -100,8 +101,8 @@ public class Chat extends JFrame {
         channelLabel.setForeground(textColor);
 
         // Get messages from current channel and append them to chat area
-        refreshMessages();
-        
+        showMessages();
+
         chatArea.setBackground(new java.awt.Color(106, 111, 117));
         chatArea.setCellRenderer(new CellRenderer());
         chatArea.setFixedCellHeight(85);
@@ -251,7 +252,7 @@ public class Chat extends JFrame {
                 // Clear chat area
                 model.removeAllElements();
                 // Get messages from current channel and append them to chat area
-                refreshMessages();
+                showMessages();
             }
         });
 
@@ -292,7 +293,7 @@ public class Chat extends JFrame {
                         model.removeAllElements();
                         // Get messages from current channel and append them to chat area
 
-                        refreshMessages();
+                        showMessages();
                     } else {
                         // Get channel name from channels list to make sure that capitalization is the same
                         for (int i = 0; i < channels.size(); i++) {
@@ -311,7 +312,7 @@ public class Chat extends JFrame {
                             // Clear chat area
                             model.removeAllElements();
                             // Get messages from current channel and append them to chat area
-                            refreshMessages();
+                            showMessages();
                         }
                     }
                 }
@@ -338,7 +339,7 @@ public class Chat extends JFrame {
             ChatMessage msg = new ChatMessage(currentChannel, authentication.getLoggedUser(), message, timestamp);
 
             Color colorComparison = new java.awt.Color(190, 190, 190);
-            
+
             // Don't send a new message if message is empty or if message color equals placeholder color
             if (!message.isEmpty() && !messageField.getForeground().equals(colorComparison)) {
                 model.addElement(msg);
@@ -408,11 +409,11 @@ public class Chat extends JFrame {
             String channelStr = channelLabel.getText().replaceAll("\\s+", "");
             channelStr = channelStr.replace("#", "");
             currentChannel = channelStr.trim();
-            
+
             messageField.setForeground(new Color(190, 190, 190));
             model.removeAllElements();
             // Get messages from current channel and append them to chat area
-            refreshMessages();
+            showMessages();
         });
 
         // Set hover actions to buttons
@@ -487,16 +488,36 @@ public class Chat extends JFrame {
                 logoutButton.setBackground(new java.awt.Color(158, 63, 65));
             }
         });
+
+        // Refresh messages every second
+        int delay = 1000; //milliseconds
+        ActionListener taskPerformer = new ActionListener() {
+            public void actionPerformed(ActionEvent evt) {
+                refreshMessages();
+            }
+        };
+        new Timer(delay, taskPerformer).start();
     }
 
     // Get messages from current channel and display them in chat area
-    private void refreshMessages() {
+    private void showMessages() {
         this.messages = chatChannel.getMessagesFromChannel(currentChannel);
         if (messages != null && !messages.isEmpty()) {
-            chatChannel.getMessagesFromChannel(currentChannel).forEach(msg -> {
+            this.messages.forEach(msg -> {
                 model.addElement(msg);
             });
         }
+    }
+    
+    private void refreshMessages() {
+        ArrayList<ChatMessage> msgs = chatChannel.getNewestMessages(currentChannel);
+        
+       if (msgs != null) {
+           for (ChatMessage msg : msgs) {
+               model.addElement(msg);
+               this.messages.add(msg);
+           }
+       }
     }
 
     @Override

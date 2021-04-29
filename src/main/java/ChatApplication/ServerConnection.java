@@ -36,6 +36,7 @@ public class ServerConnection {
 
     private final String certificate;
     private final Authentication authentication;
+    private String lastModified = null;
 
     public ServerConnection(String certificatePath) {
         authentication = Authentication.getInstance();
@@ -230,6 +231,7 @@ public class ServerConnection {
             connection.setRequestProperty("Authorization", basicAuth);
             connection.setRequestProperty("Content-Type", "application/json");
             connection.setRequestMethod("GET");
+
             connection.setReadTimeout(3 * 1000);
             connection.setUseCaches(false);
 
@@ -241,11 +243,13 @@ public class ServerConnection {
                     .collect(Collectors.joining("\n"));
 
             stream.close();
-            JSONArray jsonArray = new JSONArray(text);
+
+            this.lastModified = connection.getHeaderField("Last-Modified");
 
             if (text.isEmpty()) {
                 return null;
             }
+            JSONArray jsonArray = new JSONArray(text);
 
             for (int i = 0; i < jsonArray.length(); i++) {
                 JSONObject object = jsonArray.getJSONObject(i);
@@ -265,6 +269,7 @@ public class ServerConnection {
                 messages.add(msg);
             }
         } catch (IOException | KeyManagementException | KeyStoreException | NoSuchAlgorithmException | CertificateException | JSONException e) {
+            e.printStackTrace();
             System.out.println("Error getting messages from channel");
         }
 
@@ -316,5 +321,76 @@ public class ServerConnection {
                 .collect(Collectors.joining("\n"));
 
         stream.close();
+    }
+
+    public synchronized ArrayList getMessagesSince(String channel) throws IOException, CertificateException, KeyStoreException, NoSuchAlgorithmException, KeyManagementException {
+        ArrayList<ChatMessage> messages = new ArrayList<>();
+        try {
+            URL url = new URL("https://localhost:8001/chat/?channel=" + channel);
+            HttpsURLConnection connection = createHTTPSConnection(url);
+
+            String username = authentication.getLoggedUser();
+            String password = authentication.getPassword();
+
+            // Set basic authentication
+            //String userCredentials = "username:password";
+            String userCredentials = username + ":" + password;
+            String basicAuth = "Basic " + new String(Base64.getEncoder().encode(userCredentials.getBytes()));
+
+            //  Set connection properties
+            connection.setRequestProperty("Authorization", basicAuth);
+            connection.setRequestProperty("Content-Type", "application/json");
+            connection.setRequestMethod("GET");
+            System.out.println("JOU");
+            System.out.println(lastModified);
+            if (lastModified != null) {
+                connection.setRequestProperty("If-Modified-Since", lastModified);
+            } else {
+                return null;
+            }
+            connection.setReadTimeout(3 * 1000);
+            connection.setUseCaches(false);
+
+            System.out.println("JOU2");
+            InputStream stream = connection.getInputStream();
+
+            String text = new BufferedReader(new InputStreamReader(stream,
+                    StandardCharsets.UTF_8))
+                    .lines()
+                    .collect(Collectors.joining("\n"));
+
+            stream.close();
+            System.out.println("JOU3");
+            lastModified = connection.getHeaderField("Last-Modified");
+
+            if (text.isEmpty()) {
+                return null;
+            }
+
+            System.out.println("lastmodified: " + lastModified);
+            JSONArray jsonArray = new JSONArray(text);
+
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONObject object = jsonArray.getJSONObject(i);
+
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM.dd.yyyy HH:mm:ss");
+                ZonedDateTime zd = ZonedDateTime.parse(object.getString("sent"));
+                LocalDateTime date = zd.toLocalDateTime();
+                String formattedDate = date.format(formatter);
+
+                ChatMessage msg = new ChatMessage(channel, object.getString("user"), object.getString("message"), formattedDate);
+
+                // If username field is blank don't show message (don't add it to message list) (implementing channel adding this way)
+                if (msg.user.isBlank()) {
+                    continue;
+                }
+
+                messages.add(msg);
+            }
+        } catch (IOException | KeyManagementException | KeyStoreException | NoSuchAlgorithmException | CertificateException | JSONException e) {
+            System.out.println("Error getting newest messages from channel");
+        }
+
+        return messages;
     }
 }
