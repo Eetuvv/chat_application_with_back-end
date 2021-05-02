@@ -143,6 +143,7 @@ public class Registration extends JFrame {
                 passwordField2.setBackground(new java.awt.Color(251, 93, 93));
                 JOptionPane.showMessageDialog(null, "Salasanat eivät täsmää", "Kirjautumisvirhe", JOptionPane.ERROR_MESSAGE);
             } else {
+                // TODO fix error msg
                 if (!authentication.addUser(user, password, email, nickname)) {
                     JOptionPane.showMessageDialog(null, "Käyttäjänimi on jo rekisteröity", "Kirjautumisvirhe", JOptionPane.ERROR_MESSAGE);
                     usernameField.setBackground(new java.awt.Color(251, 93, 93));

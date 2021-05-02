@@ -339,7 +339,7 @@ public class Chat extends JFrame {
         sendMessageButton.addActionListener((java.awt.event.ActionEvent evt) -> {
             String message = messageField.getText();
             ZonedDateTime time = ZonedDateTime.now();
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM.dd.yyyy HH:mm:ss");
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
             String timestamp = time.format(formatter);
 
             ChatMessage msg = new ChatMessage(currentChannel, authentication.getLoggedUser(), message, timestamp);
@@ -374,7 +374,7 @@ public class Chat extends JFrame {
                     if (messageField.hasFocus() && !messageField.getText().isEmpty()) {
                         String message = messageField.getText();
                         ZonedDateTime time = ZonedDateTime.now();
-                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM.dd.yyyy HH:mm:ss");
+                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
                         String timestamp = time.format(formatter);
 
                         ChatMessage msg = new ChatMessage(currentChannel, authentication.getLoggedUser(), message, timestamp);

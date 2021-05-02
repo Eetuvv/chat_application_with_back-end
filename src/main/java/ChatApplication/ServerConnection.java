@@ -2,6 +2,7 @@ package ChatApplication;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -34,14 +35,37 @@ import org.json.JSONObject;
 
 public class ServerConnection {
 
-    private final String certificate;
+    private String certificate;
     private final Authentication authentication;
     private String lastModified = null;
+    private static ServerConnection singleton = null;
 
-    public ServerConnection(String certificatePath) {
+    public ServerConnection() {
         authentication = Authentication.getInstance();
-        this.certificate = "C:\\Users\\Eetu\\Documents\\NetBeansProjects\\Chat_application_with_back_end\\localhost.cer";
+        //this.certificate = "C:\\Users\\Eetu\\Documents\\NetBeansProjects\\Chat_application_with_back_end\\localhost.cer";
+        this.certificate = "";
         System.setProperty("http.keepAlive", "false");
+    }
+    
+    public static synchronized ServerConnection getInstance() {
+        // Create a singleton to only create one instance at a time
+        if (singleton == null) {
+            singleton = new ServerConnection();
+        }
+        return singleton;
+    }
+    
+    private void setSertificate(String certificate) {
+        this.certificate = certificate;
+    }
+
+    public static void main(String[] args) {
+        java.awt.EventQueue.invokeLater(() -> {
+            ServerConnection connection = ServerConnection.getInstance();
+            connection.setSertificate(args[0]);
+            Login login = new Login();
+            login.setVisible(true);
+        });
     }
 
     private HttpsURLConnection createHTTPSConnection(URL url) throws CertificateException, KeyStoreException, IOException, NoSuchAlgorithmException, KeyManagementException {
@@ -206,6 +230,8 @@ public class ServerConnection {
         } catch (ConnectException e) {
             responseCode = 400;
             System.out.println(responseCode + ": Error connecting to server");
+        } catch (FileNotFoundException e ) {
+            System.out.println("Certificate not found!");
         } catch (IOException | KeyManagementException | KeyStoreException | NoSuchAlgorithmException | CertificateException e) {
             System.out.println(responseCode + ": Authentication error");
         }
@@ -223,7 +249,6 @@ public class ServerConnection {
             String password = authentication.getPassword();
 
             // Set basic authentication
-            //String userCredentials = "username:password";
             String userCredentials = username + ":" + password;
             String basicAuth = "Basic " + new String(Base64.getEncoder().encode(userCredentials.getBytes()));
 
@@ -254,7 +279,7 @@ public class ServerConnection {
             for (int i = 0; i < jsonArray.length(); i++) {
                 JSONObject object = jsonArray.getJSONObject(i);
 
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM.dd.yyyy HH:mm:ss");
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
                 ZonedDateTime zd = ZonedDateTime.parse(object.getString("sent"));
                 LocalDateTime date = zd.toLocalDateTime();
                 String formattedDate = date.format(formatter);
@@ -371,7 +396,7 @@ public class ServerConnection {
             for (int i = 0; i < jsonArray.length(); i++) {
                 JSONObject object = jsonArray.getJSONObject(i);
 
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM.dd.yyyy HH:mm:ss");
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
                 ZonedDateTime zd = ZonedDateTime.parse(object.getString("sent"));
                 LocalDateTime date = zd.toLocalDateTime();
                 String formattedDate = date.format(formatter);

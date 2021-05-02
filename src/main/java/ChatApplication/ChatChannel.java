@@ -14,7 +14,8 @@ public class ChatChannel {
 
     HashMap<String, ChatChannel> channels;
     String currentChannel;
-    private final ServerConnection connection = new ServerConnection("C:\\Users\\Eetu\\Documents\\NetBeansProjects\\Chat_application_with_back_end\\localhost.cer");
+    private final ServerConnection connection = ServerConnection.getInstance();
+    //private final ServerConnection connection = new ServerConnection("C:\\Users\\Eetu\\Documents\\NetBeansProjects\\Chat_application_with_back_end\\localhost.cer");
 
     public ChatChannel() {
         this.channels = new HashMap<>();
@@ -76,7 +77,9 @@ public class ChatChannel {
         Authentication authentication = Authentication.getInstance();
 
         try {
-            return connection.getMessagesSince(channel);
+            if (!authentication.getLoggedUser().isEmpty()) {
+                return connection.getMessagesSince(channel);
+            }
         } catch (IOException | CertificateException | KeyStoreException | NoSuchAlgorithmException | KeyManagementException ex) {
             Logger.getLogger(ChatChannel.class.getName()).log(Level.SEVERE, null, ex);
         }

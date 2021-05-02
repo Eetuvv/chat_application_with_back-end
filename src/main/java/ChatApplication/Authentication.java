@@ -30,7 +30,8 @@ public class Authentication {
     }
 
     public int authenticateUser(String username, String password) {
-        ServerConnection connection = new ServerConnection("C:\\Users\\Eetu\\Documents\\NetBeansProjects\\Chat_application_with_back_end\\localhost.cer");
+        //ServerConnection connection = new ServerConnection("C:\\Users\\Eetu\\Documents\\NetBeansProjects\\Chat_application_with_back_end\\localhost.cer");
+        ServerConnection connection = ServerConnection.getInstance();
         try {
             if (connection.authenticate(username, password) == 200) {
                 setPassword(password);
@@ -46,7 +47,7 @@ public class Authentication {
     }
 
     public boolean addUser(String username, String password, String email, String nickname) {
-        ServerConnection connection = new ServerConnection("C:\\Users\\Eetu\\Documents\\NetBeansProjects\\Chat_application_with_back_end\\localhost.cer");
+        ServerConnection connection = ServerConnection.getInstance();
         try {
             if (connection.registerUser(nickname, username, password, email, "user") == 200) {
                 return true;

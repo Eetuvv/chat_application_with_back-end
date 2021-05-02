@@ -19,7 +19,8 @@ public class Login extends JFrame {
 
     private final JFrame loginFrame = new JFrame("Kirjautuminen");
     private final JPanel loginPanel = new JPanel();
-    private ServerConnection connection = new ServerConnection("C:\\Users\\Eetu\\Documents\\NetBeansProjects\\Chat_application_with_back_end\\localhost.cer");
+    //private ServerConnection connection = new ServerConnection("C:\\Users\\Eetu\\Documents\\NetBeansProjects\\Chat_application_with_back_end\\localhost.cer");
+    private final ServerConnection connection = ServerConnection.getInstance();
 
     public Login() {
         initComponents();
@@ -156,10 +157,5 @@ public class Login extends JFrame {
         loginFrame.setVisible(visible);
     }
 
-    public static void main(String[] args) {
-        java.awt.EventQueue.invokeLater(() -> {
-            Login login = new Login();
-            login.setVisible(true);
-        });
-    }
+    
 }
