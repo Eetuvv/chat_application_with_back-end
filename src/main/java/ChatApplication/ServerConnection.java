@@ -35,10 +35,10 @@ import org.json.JSONObject;
 
 public class ServerConnection {
 
-    private String certificate;
     private final Authentication authentication;
-    private String lastModified = null;
     private static ServerConnection singleton = null;
+    private String certificate;
+    private String lastModified = null;
 
     public ServerConnection() {
         authentication = Authentication.getInstance();
@@ -150,15 +150,12 @@ public class ServerConnection {
     public synchronized ArrayList listChannels(String username, String password) throws IOException, KeyStoreException, NoSuchAlgorithmException, KeyManagementException, CertificateException {
         ArrayList<String> channelList = new ArrayList<>();
         try {
-            BufferedReader reader = null;
-            String payload = "body";
 
             URL url = new URL("https://localhost:8001/chat/?listChannels");
             HttpsURLConnection connection = createHTTPSConnection(url);
 
             // Set basic authentication
             String userCredentials = username + ":" + password;
-            //String userCredentials = "username:password";
             String basicAuth = "Basic " + new String(Base64.getEncoder().encode(userCredentials.getBytes()));
 
             //  Set connection properties
@@ -166,7 +163,6 @@ public class ServerConnection {
             connection.setRequestProperty("Content-Type", "application/json");
             connection.setRequestMethod("GET");
             connection.setReadTimeout(3 * 1000);
-            //connection.setDoOutput(true);
             connection.setUseCaches(false);
 
             InputStream stream = connection.getInputStream();
@@ -201,7 +197,6 @@ public class ServerConnection {
 
             // Set basic authentication
             String userCredentials = username + ":" + password;
-            //String userCredentials = "username:password";
             String basicAuth = "Basic " + new String(Base64.getEncoder().encode(userCredentials.getBytes()));
 
             //  Set connection properties
@@ -209,7 +204,6 @@ public class ServerConnection {
             connection.setRequestProperty("Content-Type", "application/json");
             connection.setRequestMethod("GET");
             connection.setReadTimeout(3 * 1000);
-            //connection.setDoOutput(true);
             connection.setUseCaches(false);
 
             InputStream stream = connection.getInputStream();
@@ -223,14 +217,12 @@ public class ServerConnection {
 
             responseCode = connection.getResponseCode();
 
-            // TODO CHECK auth
         } catch (ConnectException e) {
             responseCode = 400;
             System.out.println(responseCode + ": Error connecting to server");
         } catch (FileNotFoundException e) {
             System.out.println("Certificate not found!");
         } catch (IOException | KeyManagementException | KeyStoreException | NoSuchAlgorithmException | CertificateException e) {
-            e.printStackTrace();
             System.out.println(responseCode + ": Authentication error");
         }
 
@@ -285,14 +277,13 @@ public class ServerConnection {
                 ChatMessage msg = new ChatMessage(channel, object.getString("user"), object.getString("message"), formattedDate);
 
                 // If username field is blank don't show message (don't add it to message list) (implementing channel adding this way)
-                if (msg.user.isBlank()) {
+                if (msg.getUser().isBlank()) {
                     continue;
                 }
 
                 messages.add(msg);
             }
         } catch (IOException | KeyManagementException | KeyStoreException | NoSuchAlgorithmException | CertificateException | JSONException e) {
-            e.printStackTrace();
             System.out.println("Error getting messages from channel");
         }
 
@@ -400,7 +391,7 @@ public class ServerConnection {
                 ChatMessage msg = new ChatMessage(channel, object.getString("user"), object.getString("message"), formattedDate);
 
                 // If username field is blank don't show message (don't add it to message list) (implementing channel adding this way)
-                if (msg.user.isBlank()) {
+                if (msg.getUser().isBlank()) {
                     continue;
                 }
 
@@ -503,7 +494,7 @@ public class ServerConnection {
             stream.close();
             connection.disconnect();
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("Error editing user password");
         }
     }
 

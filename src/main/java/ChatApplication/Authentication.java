@@ -6,13 +6,9 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class Authentication {
 
-    //private final HashMap<String, User> users;
     private String loggedUser;
     private String loggedPassword;
     private String loggedEmail;
@@ -20,7 +16,6 @@ public class Authentication {
     private static Authentication singleton = null;
 
     public Authentication() {
-        //this.users = new HashMap<>();
         this.loggedUser = "";
         this.loggedEmail = "";
         this.loggedNickname = "";

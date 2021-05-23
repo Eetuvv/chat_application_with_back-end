@@ -35,13 +35,13 @@ import javax.swing.border.LineBorder;
 
 public class Chat extends JFrame {
 
-    public final JFrame chatFrame = new JFrame("Chat");
-    private ChatChannel chatChannel = new ChatChannel();
-    public String currentChannel;
+    private final JFrame chatFrame = new JFrame("Chat");
+    private final ChatChannel chatChannel = new ChatChannel();
     private final JLabel nicknameText = new JLabel("Nimimerkki");
     private final DefaultListModel<ChatMessage> model = new DefaultListModel<>();
-    private JList<ChatMessage> chatArea = new JList<>(model);
+    private final JList<ChatMessage> chatArea = new JList<>(model);
     private ArrayList<ChatMessage> messages;
+    private String currentChannel;
     private static Chat singleton = null;
 
     public Chat() {

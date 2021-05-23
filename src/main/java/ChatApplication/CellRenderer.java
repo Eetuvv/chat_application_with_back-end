@@ -14,7 +14,7 @@ public class CellRenderer extends JLabel implements ListCellRenderer<ChatMessage
 
     @Override
     public Component getListCellRendererComponent(JList<? extends ChatMessage> list, ChatMessage msg, int index, boolean isSelected, boolean cellHasFocus) {
-        setText("<html><p><i><FONT COLOR=WHITE SIZE=5>" + msg.user + "</FONT></i>&nbsp&nbsp<em><FONT COLOR=BLACK SIZE=4>" + msg.timestamp + "</FONT></em></p><br><p><FONT COLOR=WHITE>" + msg.message + "</FONT></p></html>");
+        setText("<html><p><i><FONT COLOR=WHITE SIZE=5>" + msg.getUser() + "</FONT></i>&nbsp&nbsp<em><FONT COLOR=BLACK SIZE=4>" + msg.getTimestamp() + "</FONT></em></p><br><p><FONT COLOR=WHITE>" + msg.getMessage() + "</FONT></p></html>");
         setFont(new java.awt.Font("Whitney", 1, 16));
         
         

@@ -41,7 +41,6 @@ public class Registration extends JFrame {
     }
 
     private void initComponents() {
-
         registrationFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         registrationFrame.setSize(1000, 800);
         registrationFrame.setResizable(false);

@@ -6,19 +6,15 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class ChatChannel {
 
-    HashMap<String, ChatChannel> channels;
-    String currentChannel;
+    private String currentChannel;
     private final ServerConnection connection = ServerConnection.getInstance();
-    //private final ServerConnection connection = new ServerConnection("C:\\Users\\Eetu\\Documents\\NetBeansProjects\\Chat_application_with_back_end\\localhost.cer");
 
     public ChatChannel() {
-        this.channels = new HashMap<>();
         this.currentChannel = "Yleinen";
         addChannel("Yleinen");
     }
@@ -91,7 +87,7 @@ public class ChatChannel {
 
         try {
             ArrayList<String> channels = connection.listChannels(authentication.getLoggedUser(), authentication.getPassword());
-            if (channels.toString().contains(msg.channel)) {
+            if (channels.toString().contains(msg.getChannel())) {
                 connection.postMessageToChannel(authentication.getLoggedUser(), authentication.getPassword(), msg);
             }
         } catch (IOException | KeyStoreException | NoSuchAlgorithmException | KeyManagementException | CertificateException ex) {
