@@ -46,7 +46,7 @@ public class ServerConnection {
         this.certificate = "";
         System.setProperty("http.keepAlive", "false");
     }
-    
+
     public static synchronized ServerConnection getInstance() {
         // Create a singleton to only create one instance at a time
         if (singleton == null) {
@@ -54,7 +54,7 @@ public class ServerConnection {
         }
         return singleton;
     }
-    
+
     private void setSertificate(String certificate) {
         this.certificate = certificate;
     }
@@ -88,7 +88,6 @@ public class ServerConnection {
     }
 
     public synchronized int registerUser(String nickname, String username, String password, String email, String role) throws IOException, CertificateException, KeyStoreException, NoSuchAlgorithmException, KeyManagementException {
-
         URL url = new URL("https://localhost:8001/registration");
         int responseCode = 200;
 
@@ -149,7 +148,6 @@ public class ServerConnection {
     }
 
     public synchronized ArrayList listChannels(String username, String password) throws IOException, KeyStoreException, NoSuchAlgorithmException, KeyManagementException, CertificateException {
-
         ArrayList<String> channelList = new ArrayList<>();
         try {
             BufferedReader reader = null;
@@ -193,7 +191,6 @@ public class ServerConnection {
     }
 
     public synchronized int authenticate(String username, String password) throws IOException, KeyStoreException, NoSuchAlgorithmException, KeyManagementException, CertificateException {
-
         int responseCode = 401;
         try {
             BufferedReader reader = null;
@@ -230,9 +227,10 @@ public class ServerConnection {
         } catch (ConnectException e) {
             responseCode = 400;
             System.out.println(responseCode + ": Error connecting to server");
-        } catch (FileNotFoundException e ) {
+        } catch (FileNotFoundException e) {
             System.out.println("Certificate not found!");
         } catch (IOException | KeyManagementException | KeyStoreException | NoSuchAlgorithmException | CertificateException e) {
+            e.printStackTrace();
             System.out.println(responseCode + ": Authentication error");
         }
 
@@ -302,7 +300,6 @@ public class ServerConnection {
     }
 
     public synchronized void postMessageToChannel(String username, String password, ChatMessage chatMessage) throws IOException, CertificateException, KeyStoreException, NoSuchAlgorithmException, KeyManagementException {
-
         URL url = new URL("https://localhost:8001/chat/");
         HttpsURLConnection connection = createHTTPSConnection(url);
 
@@ -358,7 +355,6 @@ public class ServerConnection {
             String password = authentication.getPassword();
 
             // Set basic authentication
-            //String userCredentials = "username:password";
             String userCredentials = username + ":" + password;
             String basicAuth = "Basic " + new String(Base64.getEncoder().encode(userCredentials.getBytes()));
 
@@ -415,5 +411,153 @@ public class ServerConnection {
         }
 
         return messages;
+    }
+
+    public synchronized void editUserDetails(String username, String updatedUsername, String updatedEmail) throws IOException, CertificateException, KeyStoreException, NoSuchAlgorithmException, KeyManagementException {
+        URL url = new URL("https://localhost:8001/chat/");
+        HttpsURLConnection connection = createHTTPSConnection(url);
+
+        String password = authentication.getPassword();
+        String userCredentials = username + ":" + password;
+        String basicAuth = "Basic " + new String(Base64.getEncoder().encode(userCredentials.getBytes()));
+
+        //  Set connection properties
+        connection.setRequestProperty("Authorization", basicAuth);
+        connection.setRequestProperty("Content-Type", "application/json");
+        connection.setRequestMethod("PUT");
+        connection.setDoOutput(true);
+        connection.setReadTimeout(3 * 1000);
+        connection.setUseCaches(false);
+
+        // Body for request
+        JSONObject json = new JSONObject();
+        json.put("user", username);
+        json.put("action", "editUser");
+        json.put("role", "user");
+
+        JSONObject userdetails = new JSONObject();
+        userdetails.put("updatedUsername", updatedUsername);
+        userdetails.put("updatedEmail", updatedEmail);
+        userdetails.put("role", "user");
+        
+        json.put("userdetails", userdetails);
+
+        // Write to outputstream
+        OutputStream os = connection.getOutputStream();
+        String payload = json.toString();
+
+        os.write(payload.getBytes(StandardCharsets.UTF_8));
+
+        os.flush();
+        os.close();
+
+        InputStream stream = connection.getInputStream();
+
+        String text = new BufferedReader(new InputStreamReader(stream,
+                StandardCharsets.UTF_8))
+                .lines()
+                .collect(Collectors.joining("\n"));
+
+        stream.close();
+    }
+
+    public synchronized void editUserPassword(String username, String updatedPassword) throws IOException, CertificateException, KeyStoreException, NoSuchAlgorithmException, KeyManagementException {
+        URL url = new URL("https://localhost:8001/chat/");
+        HttpsURLConnection connection = createHTTPSConnection(url);
+
+        String password = authentication.getPassword();
+        String userCredentials = username + ":" + password;
+        String basicAuth = "Basic " + new String(Base64.getEncoder().encode(userCredentials.getBytes()));
+
+        //  Set connection properties
+        connection.setRequestProperty("Authorization", basicAuth);
+        connection.setRequestProperty("Content-Type", "application/json");
+        connection.setRequestMethod("PUT");
+        connection.setDoOutput(true);
+        connection.setReadTimeout(3 * 1000);
+        connection.setUseCaches(false);
+
+        // Body for request
+        JSONObject json = new JSONObject();
+        json.put("user", username);
+        json.put("action", "editPassword");
+        json.put("updatedPassword", updatedPassword);
+
+        // Write to outputstream
+        try {
+            OutputStream os = connection.getOutputStream();
+            String payload = json.toString();
+
+            os.write(payload.getBytes(StandardCharsets.UTF_8));
+
+            os.flush();
+            os.close();
+
+            InputStream stream = connection.getInputStream();
+
+            String text = new BufferedReader(new InputStreamReader(stream,
+                    StandardCharsets.UTF_8))
+                    .lines()
+                    .collect(Collectors.joining("\n"));
+
+            stream.close();
+            connection.disconnect();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public synchronized ArrayList getUserDetails(String username, String password) throws IOException, KeyStoreException, NoSuchAlgorithmException, KeyManagementException, CertificateException {
+        ArrayList<String> userDetails = new ArrayList<>();
+        try {
+            BufferedReader reader = null;
+
+            URL url = new URL("https://localhost:8001/chat/");
+            HttpsURLConnection connection = createHTTPSConnection(url);
+
+            // Set basic authentication
+            String userCredentials = username + ":" + password;
+            String basicAuth = "Basic " + new String(Base64.getEncoder().encode(userCredentials.getBytes()));
+
+            //  Set connection properties
+            connection.setRequestProperty("Authorization", basicAuth);
+            connection.setRequestProperty("Content-Type", "application/json");
+            connection.setRequestMethod("POST");
+            connection.setReadTimeout(3 * 1000);
+            connection.setDoOutput(true);
+            connection.setUseCaches(false);
+
+            JSONObject json = new JSONObject();
+            json.put("user", username);
+            json.put("action", "getUserDetails");
+
+            OutputStream os = connection.getOutputStream();
+            String payload = json.toString();
+
+            os.write(payload.getBytes(StandardCharsets.UTF_8));
+
+            os.flush();
+            os.close();
+
+            InputStream stream = connection.getInputStream();
+
+            String text = new BufferedReader(new InputStreamReader(stream,
+                    StandardCharsets.UTF_8))
+                    .lines()
+                    .collect(Collectors.joining("\n"));
+
+            stream.close();
+
+            // Strip commas and square brackets from list items and add them to new arraylist
+            List<String> myList = new ArrayList<>(Arrays.asList(text.split(",")));
+            for (int i = 0; i < myList.size(); i++) {
+                userDetails.add(myList.get(i).replace("[", "").replace("]", "").trim());
+            }
+
+        } catch (IOException | KeyManagementException | KeyStoreException | NoSuchAlgorithmException | CertificateException e) {
+            System.out.println("Error getting user details");
+        }
+
+        return userDetails;
     }
 }

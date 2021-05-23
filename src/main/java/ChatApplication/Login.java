@@ -4,6 +4,9 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.util.ArrayList;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JFrame;
@@ -106,6 +109,8 @@ public class Login extends JFrame {
         loginPanel.add(passwordCheckBox);
         loginPanel.add(loginButton);
         loginPanel.add(registerButton);
+        
+        loginFrame.getRootPane().setDefaultButton(loginButton);
 
         // Set login button functionality
         loginButton.addActionListener((java.awt.event.ActionEvent evt) -> {
@@ -113,6 +118,16 @@ public class Login extends JFrame {
             String password = String.valueOf(passwordField.getPassword());
 
             UIManager.put("OptionPane.okButtonText", "OK");
+            Color redBackground = new java.awt.Color(251, 93, 93);
+
+            if (user.isEmpty()) {
+                usernameField.setBackground(redBackground);
+            }
+
+            if (password.isEmpty()) {
+                passwordField.setBackground(redBackground);
+            }
+
             if (password.isEmpty() || user.isEmpty()) {
                 JOptionPane.showMessageDialog(null, "Käyttäjätunnus tai salasana ei saa olla tyhjä", "Kirjautumisvirhe", JOptionPane.ERROR_MESSAGE);
             } else {
@@ -121,10 +136,14 @@ public class Login extends JFrame {
 
                 if (response == 200) {
                     authentication.setLoggedUser(user);
+                    authentication.setUserDetails(user, password);
+                    // TODO add nick
+                    authentication.setLoggedNick(user);
+                    
                     // Close login window and open chat window
                     this.setVisible(false);
                     this.dispose();
-                    Chat chatWindow = new Chat();
+                    Chat chatWindow = Chat.getInstance();
                     chatWindow.setVisible(true);
                 } else if (response == 401) { // 401 if username or password incorrect
                     JOptionPane.showMessageDialog(null, "Väärä käyttäjätunnus tai salasana", "Kirjautumisvirhe", JOptionPane.ERROR_MESSAGE);
@@ -149,13 +168,85 @@ public class Login extends JFrame {
                 passwordField.setEchoChar('*');
             }
         });
+
+        usernameField.addKeyListener(new KeyListener() {
+            @Override
+            public void keyTyped(KeyEvent arg0) {
+            }
+
+            @Override
+            public void keyReleased(KeyEvent arg0) {
+                Color redBackground = new java.awt.Color(251, 93, 93);
+                if (!usernameField.getText().isEmpty() && usernameField.getBackground().equals(redBackground)) {
+                    usernameField.setBackground(Color.WHITE);
+                } else if (usernameField.getText().isEmpty()) {
+                    usernameField.setBackground(redBackground);
+                }
+            }
+
+            @Override
+            public void keyPressed(KeyEvent arg0) {
+            }
+        });
+
+        passwordField.addKeyListener(new KeyListener() {
+            @Override
+            public void keyTyped(KeyEvent arg0) {
+            }
+
+            @Override
+            public void keyReleased(KeyEvent arg0) {
+                Color redBackground = new java.awt.Color(251, 93, 93);
+                if (!String.valueOf(passwordField.getPassword()).isEmpty() && passwordField.getBackground().equals(redBackground)) {
+                    passwordField.setBackground(Color.WHITE);
+                } else if (usernameField.getText().isEmpty()) {
+                    passwordField.setBackground(redBackground);
+                }
+            }
+
+            @Override
+            public void keyPressed(KeyEvent arg0) {
+            }
+        });
+
+        loginButton.addKeyListener(new java.awt.event.KeyListener() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+            }
+
+            @Override
+            public void keyPressed(KeyEvent e) {
+                // Activate login button when enter key is pressed
+                if (e.getKeyChar() == KeyEvent.VK_ENTER) {
+                    loginButton.doClick();
+                }
+            }
+
+            @Override
+            public void keyReleased(KeyEvent e) {
+            }
+        });
+
+        // Set register button functionality
+        registerButton.addActionListener((java.awt.event.ActionEvent evt) -> {
+            setVisible(false);
+            Registration registration = new Registration();
+            registration.setVisible(true);
+        });
+
+        // Make password visible when checkbox is clicked
+        passwordCheckBox.addActionListener((ActionEvent e) -> {
+            if (passwordCheckBox.isSelected()) {
+                passwordField.setEchoChar((char) 0);
+            } else {
+                passwordField.setEchoChar('*');
+            }
+        });
     }
 
-    // Set visibility of login window
+// Set visibility of login window
     @Override
     public void setVisible(boolean visible) {
         loginFrame.setVisible(visible);
     }
-
-    
 }

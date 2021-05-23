@@ -5,20 +5,26 @@ import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class Authentication {
 
-    private final HashMap<String, User> users;
+    //private final HashMap<String, User> users;
     private String loggedUser;
     private String loggedPassword;
+    private String loggedEmail;
+    private String loggedNickname;
     private static Authentication singleton = null;
 
     public Authentication() {
-        this.users = new HashMap<>();
+        //this.users = new HashMap<>();
         this.loggedUser = "";
+        this.loggedEmail = "";
+        this.loggedNickname = "";
+        this.loggedPassword = "";
     }
 
     public static synchronized Authentication getInstance() {
@@ -40,8 +46,8 @@ public class Authentication {
                 return 401;
             }
             // Check if user exists and if password matches
-        } catch (IOException | CertificateException | KeyStoreException | NoSuchAlgorithmException | KeyManagementException ex) {
-            Logger.getLogger(Authentication.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException | CertificateException | KeyStoreException | NoSuchAlgorithmException | KeyManagementException e) {
+            e.printStackTrace();
         }
         return 400;
     }
@@ -56,6 +62,35 @@ public class Authentication {
             System.out.println("Error adding user");
         }
         return false;
+    }
+    
+    public void editPassword(String newPassword) {
+        ServerConnection connection = ServerConnection.getInstance();
+        try {
+            connection.editUserPassword(loggedUser, newPassword);
+            setPassword(newPassword);
+        } catch (IOException | CertificateException | KeyStoreException | NoSuchAlgorithmException | KeyManagementException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    public void setUserDetails(String user, String password) {
+        ServerConnection connection = ServerConnection.getInstance();
+        try {
+            ArrayList<String> details = connection.getUserDetails(user, password);
+            setLoggedEmail(details.get(0));
+        } catch (IOException | KeyStoreException | NoSuchAlgorithmException | KeyManagementException | CertificateException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    public void editUserDetails(String user, String updatedUsername, String updatedEmail) {
+        ServerConnection connection = ServerConnection.getInstance();
+        try {
+            connection.editUserDetails(user, updatedUsername, updatedEmail);
+        } catch (IOException | KeyStoreException | NoSuchAlgorithmException | KeyManagementException | CertificateException e) {
+            e.printStackTrace();
+        }
     }
 
     public void setLoggedUser(String name) {
@@ -75,30 +110,21 @@ public class Authentication {
     public String getPassword() {
         return this.loggedPassword;
     }
+    
 
     public void setLoggedEmail(String newEmail) {
-        String username = getLoggedUser();
-        String password = this.users.get(username).password;
-        String nickname = this.users.get(username).nickname;
-
-        User user = new User(username, password, newEmail, nickname);
-        this.users.put(getLoggedUser(), user);
+        this.loggedEmail = newEmail;
     }
 
     public String getLoggedEmail() {
-        return "Email";
+        return this.loggedEmail;
     }
 
     public void setLoggedNick(String nick) {
-        String username = getLoggedUser();
-        String password = this.users.get(username).password;
-        String email = this.users.get(username).email;
-
-        User user = new User(username, password, email, nick);
-        this.users.put(getLoggedUser(), user);
+        this.loggedNickname = nick;
     }
 
     public String getLoggedNick() {
-        return "Nickname";
+        return this.loggedNickname;
     }
 }
