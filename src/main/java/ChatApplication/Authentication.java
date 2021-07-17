@@ -47,16 +47,18 @@ public class Authentication {
         return 400;
     }
 
-    public boolean addUser(String username, String password, String email, String nickname) {
+    public int addUser(String username, String password, String email, String nickname) {
         ServerConnection connection = ServerConnection.getInstance();
         try {
             if (connection.registerUser(nickname, username, password, email, "user") == 200) {
-                return true;
+                return 200;
+            } else if (connection.registerUser(nickname, username, password, email, "user") == 400) {
+                return 400;
             }
         } catch (IOException | KeyManagementException | KeyStoreException | NoSuchAlgorithmException | CertificateException e) {
             System.out.println("Error adding user");
         }
-        return false;
+        return 403;
     }
     
     public void editPassword(String newPassword) {

@@ -122,7 +122,7 @@ public class Registration extends JFrame {
         registrationPanel.add(passwordCheck);
         registrationPanel.add(loginButton);
         registrationPanel.add(registerButton);
-        
+
         registrationFrame.getRootPane().setDefaultButton(registerButton);
 
         // Add functionality to register button
@@ -264,15 +264,21 @@ public class Registration extends JFrame {
             passwordField2.setBackground(new java.awt.Color(251, 93, 93));
             JOptionPane.showMessageDialog(null, "Salasanat eivät täsmää", "Kirjautumisvirhe", JOptionPane.ERROR_MESSAGE);
         } else {
-            if (!authentication.addUser(user, password, email, nickname)) {
-                JOptionPane.showMessageDialog(null, "Käyttäjänimi on jo rekisteröity", "Kirjautumisvirhe", JOptionPane.ERROR_MESSAGE);
-                usernameField.setBackground(new java.awt.Color(251, 93, 93));
-            } else {
-                JOptionPane.showMessageDialog(null, "Rekisteröityminen onnistui", "Rekisteröityminen", JOptionPane.INFORMATION_MESSAGE);
-                this.setVisible(false);
-                this.dispose();
-                Login login = new Login();
-                login.setVisible(true);
+            switch (authentication.addUser(user, password, email, nickname)) {
+                case 403:
+                    JOptionPane.showMessageDialog(null, "Käyttäjänimi on jo rekisteröity", "Kirjautumisvirhe", JOptionPane.ERROR_MESSAGE);
+                    usernameField.setBackground(new java.awt.Color(251, 93, 93));
+                    break;
+                case 400:
+                    JOptionPane.showMessageDialog(null, "Palvelimeen ei saatu yhteyttä", "Yhteysvirhe", JOptionPane.ERROR_MESSAGE);
+                    break;
+                case 200:
+                    JOptionPane.showMessageDialog(null, "Rekisteröityminen onnistui", "Rekisteröityminen", JOptionPane.INFORMATION_MESSAGE);
+                    this.setVisible(false);
+                    this.dispose();
+                    Login login = new Login();
+                    login.setVisible(true);
+                    break;
             }
         }
     }

@@ -6,7 +6,6 @@ import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.util.ArrayList;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JFrame;
@@ -155,7 +154,8 @@ public class Login extends JFrame {
 
         // Set register button functionality
         registerButton.addActionListener((java.awt.event.ActionEvent evt) -> {
-            setVisible(false);
+            this.setVisible(false);
+            this.dispose();
             Registration registration = new Registration();
             registration.setVisible(true);
         });
@@ -225,13 +225,6 @@ public class Login extends JFrame {
             @Override
             public void keyReleased(KeyEvent e) {
             }
-        });
-
-        // Set register button functionality
-        registerButton.addActionListener((java.awt.event.ActionEvent evt) -> {
-            setVisible(false);
-            Registration registration = new Registration();
-            registration.setVisible(true);
         });
 
         // Make password visible when checkbox is clicked

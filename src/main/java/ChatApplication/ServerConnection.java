@@ -42,7 +42,6 @@ public class ServerConnection {
 
     public ServerConnection() {
         authentication = Authentication.getInstance();
-        //this.certificate = "C:\\Users\\Eetu\\Documents\\NetBeansProjects\\Chat_application_with_back_end\\localhost.cer";
         this.certificate = "";
         System.setProperty("http.keepAlive", "false");
     }
@@ -271,9 +270,11 @@ public class ServerConnection {
 
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
                 ZonedDateTime zd = ZonedDateTime.parse(object.getString("sent"));
-                LocalDateTime date = zd.toLocalDateTime();
+                LocalDateTime date = LocalDateTime.ofInstant(zd.toInstant(), ZoneId.systemDefault());
                 String formattedDate = date.format(formatter);
 
+                System.out.println(object.getString("sent"));
+                System.out.println(date);
                 ChatMessage msg = new ChatMessage(channel, object.getString("user"), object.getString("message"), formattedDate);
 
                 // If username field is blank don't show message (don't add it to message list) (implementing channel adding this way)
@@ -385,7 +386,7 @@ public class ServerConnection {
 
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
                 ZonedDateTime zd = ZonedDateTime.parse(object.getString("sent"));
-                LocalDateTime date = zd.toLocalDateTime();
+                LocalDateTime date = LocalDateTime.ofInstant(zd.toInstant(), ZoneId.systemDefault());
                 String formattedDate = date.format(formatter);
 
                 ChatMessage msg = new ChatMessage(channel, object.getString("user"), object.getString("message"), formattedDate);
