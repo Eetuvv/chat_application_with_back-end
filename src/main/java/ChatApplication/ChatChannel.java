@@ -61,7 +61,6 @@ public class ChatChannel {
                 }
             } else {
                 System.out.println("Could not get messages from channel:" + channel);
-                System.out.println("msgs: " + msgs.toString());
             }
         } catch (IOException | KeyStoreException | NoSuchAlgorithmException | KeyManagementException | CertificateException ex) {
             Logger.getLogger(ChatChannel.class.getName()).log(Level.SEVERE, null, ex);

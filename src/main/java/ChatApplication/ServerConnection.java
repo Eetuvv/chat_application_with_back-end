@@ -273,8 +273,6 @@ public class ServerConnection {
                 LocalDateTime date = LocalDateTime.ofInstant(zd.toInstant(), ZoneId.systemDefault());
                 String formattedDate = date.format(formatter);
 
-                System.out.println(object.getString("sent"));
-                System.out.println(date);
                 ChatMessage msg = new ChatMessage(channel, object.getString("user"), object.getString("message"), formattedDate);
 
                 // If username field is blank don't show message (don't add it to message list) (implementing channel adding this way)
